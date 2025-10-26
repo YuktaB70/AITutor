@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "aitutor-476118",
+  "private_key_id": "2aacaf87ee58fdc1d153ac923b43e595f7a9cffb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCuGFVDt4MF2wyt\n2RUOVjeLV1e67/XvsR6NMDo8ZTp8Sn478aP662zhuWw9i49JkH54WxaQzj9MeJ9a\nyX1MeGkRvD/hEXaIvwgse+HW7KTydJ5uXm5sLcbHymP0XvsGKwysVicNXOAV85MJ\nty6fy/4EMfVwrSkAyAuGCbcEMBz3Lt2+5DErXxxWBT9bByGLqLEl2PNJSdHYwqt6\nCuAj486b99/LvH43FP2qe0bX4i6hFNp7Af5o1L1qUPDuNFQQ3r8zxMCqr5c5fhmg\nHGBYpQW5AGyKSZenoLBISjfteCJd8gwWgmLOIXCXT3KbMQyu4YNgdbNJT4Q3sKNa\nQd7aBEtnAgMBAAECggEATYv5LtinPAx+cVGo12IAC8k0AsiwO7whZ7J7vjs4+fQU\nlo7kA/ip30HAvQlVIeeC7glk28uC1oVENiRZ854O7x9zNMWajv7InUfxKNLwBi98\nAp19giJB0OyN6WQFXJIAayNU8dbU2fJNJJ673eH3m9bFBROcmASDXYkmRG9J96/j\nochWa5LawyJjw7AN4fhsE7xIVNuy8OUunY4lUR1YS/qHbwTvZq9RPjpqkmrih45S\nXexPXfppEUVENO7+dPtrY69QtlUT4SRZ3K87DUC2tWbZ4OtsHt7M+hLStu/iMXdp\nsmKj8Zj5rTkTTJ1QtRXD2jTPj96Ami5P8LLDYTLPQQKBgQDnvxZ4fsahqtbDPQoJ\nQnCCsOxiddbCZbb2cbHtla+yxPxFcuDnIL44aCnyK94jWZjH/EuXItwkOYAMeUDw\nH/axX5ip5fv7wpWBiCVtoVcu6yUHvrs4OG+Sv34q3aGa5VPtrB0VJkpgnekMopnO\nHRSaDz1qc1VTvP+qHZN1e+TDBQKBgQDAUKitWEG15e1juDqJtfn4VHBIjhmK9EW7\nCsLbsOhT4grv7JGE4pMs+LEWQrvPWCyjeHrvSUC6M7T+C2hhl0zvdYH94i/Drfqr\nBtZB9Aa8cSHER52xW0/hVSnyvOP9QGiP16k6rSD6c7pw3ZNE3M+RsUIFTfYdvdce\ntYlnTGO4ewKBgQC78rbnrHGtpd8dYoCkN9UFuTVNOSKecF2ti1HxTKe9BZNPQ7bw\n3BZJqvjx5e/3nW+SKaSog2YkntmhxCkNVe79tXkbuWDestYLwn4QZnxNmfljSaWP\nF/4s9s79NtgcxoaFyEOh5ncF2quqSqkQh3cw5tE5ZyY5jpuOvQPdkUhbfQKBgQCE\n2rPMHH44hMB79RcrbzViYiK3XMM0hQ9u6T43unylBjD8EfdtT4DQvnTHpg5MbONZ\ngq+agoZem73bClJvqLATdJ/6nbjVe2kBoVV+dm/42kaza636idQjHExATlFJ8KbL\nR/a2fEed/Ti9I7TLC6exRD0RoQv2++CSbGKho9n35QKBgQCkjbYQMXO9gmEXaIkT\nKhRzvBmNN+OSY3mb5uekIdkpHfL21ahoo8fnbQwIZfhjuALqsGYXWsDacLiXsEXY\ned+qdGcvVYa06rzRTkygHHVx+nE9t2YVXn3XvduBKaWw7VG7v82VjqS8Cts48EdY\n6CZFANrt3nga5U+qZXF1C/PDHw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "gemini-service-account@aitutor-476118.iam.gserviceaccount.com",
+  "client_id": "110913606622324333551",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gemini-service-account%40aitutor-476118.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
