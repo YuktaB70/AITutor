@@ -1,19 +1,19 @@
-# Use an official OpenJDK image
+# Use an official OpenJDK 17 base image
 FROM openjdk:17-jdk-slim
 
-# Set working directory
+# Set working directory inside the container
 WORKDIR /app
 
 # Copy Maven files and source code
 COPY pom.xml .
 COPY src ./src
 
-# Install Maven and build the app
+# Install Maven and build your Spring Boot app
 RUN apt-get update && apt-get install -y maven
 RUN mvn clean package -DskipTests
 
-# Expose the Spring Boot port
+# Expose the app port
 EXPOSE 8090
 
-# Run the app
-CMD ["java", "-jar", "target/*.jar"]
+# Run your Spring Boot JAR file
+CMD ["java", "-jar", "target/DocAITutor-0.0.1-SNAPSHOT.jar"]
