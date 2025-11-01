@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.DocAITutor.DocAITutor.Page;
 import com.DocAITutor.DocAITutor.PDFService.PDFService;
 
-@CrossOrigin(origins = {"https://aitutorfrontend.pages.dev/"})
+@CrossOrigin(origins = {"https://f88c7bfe.aitutorfrontend.pages.dev/"})
 @RestController
 @RequestMapping("/pdf")
 public class PDFController {
