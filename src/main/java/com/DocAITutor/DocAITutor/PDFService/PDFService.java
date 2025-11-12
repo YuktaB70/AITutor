@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessRead;
@@ -37,15 +39,23 @@ import org.springframework.ai.chat.prompt.Prompt;
 
 import com.DocAITutor.DocAITutor.Page;
 import com.DocAITutor.DocAITutor.PageLinkedList;
+import com.DocAITutor.DocAITutor.Question;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.gson.Gson;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.imageio.ImageIO;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+
 
 @Service
 public class PDFService {
@@ -61,7 +71,9 @@ public class PDFService {
  	public static Map<String, Integer> pdfMeta = new HashMap<>();
     private final ChatModel chatModel; // Autowired by Spring Boot
     public final List<Map<String, String>> conversation = new ArrayList<>();
-    
+    public static String doc; 
+    public static List<Question> questions = new ArrayList<>();
+    public String response = "";
     @Autowired
     public PDFService(ChatModel chatModel) {
         this.chatModel = chatModel;
@@ -138,7 +150,11 @@ public class PDFService {
 	
 
 	public static String returnHeadPointer(String id) {
-		return pdfDocTracker.get(id).getHead().base64();
+	    PageLinkedList list = pdfDocTracker.get(id);
+	    if (list == null || list.getHead() == null) {
+	    	throw new IllegalArgumentException("Head points to null");
+	    }
+		return list.getHead().getBase64Data();
 	}
 	
 	public static int returnMeta(String id) {
@@ -173,7 +189,7 @@ public class PDFService {
 		            fullText.append(stripper.getText(doc)).append("\n");
 		            doc.close();
 		        }
-		        
+		        doc = fullText.toString(); 
 		        String prompt = """
 		        		Here are the documents provided by the user:  
 		        		""" + fullText.toString();
@@ -225,6 +241,72 @@ public class PDFService {
         return "Error summarizing PDF: " + e.getMessage();
     }
 }
+	
+	
+	public List<Question> genQuestions(String id) {
+		ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+		
+		String randomSeed = UUID.randomUUID().toString();
+
+		System.out.println("printing questions");
+		String prompt = """
+				You are an AI tutor.
+				Please ensure that they differ from the previous set of question: """ + response + """
+				Based on the following document text, generate **10 random multiple-choice questions** to test understanding.
+				There can only be one right answer. 
+				Each time this prompt is called, generate a *different random selection of questions*, varying their wording and difficulty.
+				Format your response strictly as valid JSON:
+				[
+				   {
+				            "question": "Question text here",
+				            "options": ["Option A", "Option B", "Option C", "Option D"],
+				            "answer": "Correct answer text here"
+					}
+				]
+				
+				Do NOT include explanations or any text outside of JSON.
+				All questions must be related to the context of the document. Questions should range in easy to hard difficulty.
+				
+				Document text: 
+				""" + doc;
+		
+		
+		
+		String res = chatModel.call(prompt);
+	
+		if (res.trim().startsWith("<")) {
+			System.err.println("Received HTML instead of JSON");
+			throw new RuntimeException("OpenRouter returned HTML instead of JSON");
+		}
+		
+		String res_cleaned = res    
+				.replaceAll("```json", "")
+			    .replaceAll("```", "")
+			    .trim();
+		
+		
+		Pattern JSONPattern = Pattern.compile("(\\[.*\\]|\\{.*\\})", Pattern.DOTALL);
+		Matcher matcher = JSONPattern.matcher(res_cleaned);
+		if (matcher.find()) {
+			res_cleaned = matcher.group(0);
+		}
+
+		response = res_cleaned; 
+		
+				
+
+		try {
+
+	        mapper.readTree(res_cleaned);
+	        questions = mapper.readValue(res_cleaned, new TypeReference<List<Question>>() {});
+
+		}
+		catch (JacksonException e) {
+			e.printStackTrace();
+		}
+		
+		return questions;
+	}
 	
 	
 

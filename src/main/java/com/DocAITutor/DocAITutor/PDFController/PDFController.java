@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.DocAITutor.DocAITutor.Page;
+import com.DocAITutor.DocAITutor.Question;
 import com.DocAITutor.DocAITutor.PDFService.PDFService;
-
-@CrossOrigin(origins = {"https://f88c7bfe.aitutorfrontend.pages.dev/"})
+//http://localhost:5173/
+//"https://f88c7bfe.aitutorfrontend.pages.dev/"
+@CrossOrigin(origins = {"http://localhost:5173/"})
 @RestController
 @RequestMapping("/pdf")
 public class PDFController {
@@ -154,15 +156,22 @@ public class PDFController {
 	@PostMapping("/{id}/QAs")
 	public ResponseEntity<String> startChat(@PathVariable String id, @RequestBody  String input) {
 		String response = pdfService.askQuestions(id, input);
+	
 		
+	
    
 	return ResponseEntity.ok(response);
 
-
-
-		
-
 	}
+	
+	@GetMapping("/{id}/GenQA")
+	public ResponseEntity<List<Question>> genQA(@PathVariable String id) {
+		List<Question> response = pdfService.genQuestions(id);
+		return ResponseEntity.ok(response);
+	}
+
+
+
 
 
 }
