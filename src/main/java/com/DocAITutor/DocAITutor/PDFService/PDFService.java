@@ -47,6 +47,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -58,6 +61,8 @@ import java.io.FileInputStream;
 
 
 @Service
+@Getter
+@Setter
 public class PDFService {
 	
 
@@ -69,79 +74,56 @@ public class PDFService {
 	public static Page head = null;
 	public static Page prev = null;
  	public static Map<String, Integer> pdfMeta = new HashMap<>();
-    private final ChatModel chatModel; // Autowired by Spring Boot
-    public final List<Map<String, String>> conversation = new ArrayList<>();
-    public static String doc; 
-    public static List<Question> questions = new ArrayList<>();
-    public String response = "";
-    @Autowired
-    public PDFService(ChatModel chatModel) {
-        this.chatModel = chatModel;
-        String prompt = """
-        		You are an exceptional AI tutor. 
-        		Your goal is to help students understand complex topics in a simple, structured, and encouraging way.
-        		
-        		Always:
-        		- Explain from first principles.
-        		- Use examples where possible.
-        		- Summarize key ideas at the end.
-        		- Keep tone friendly and supportive.
-        		Keep the conversation within the context of the document that are provided by the user.
-        		If user attempts to take conversation into another direction that is not related to the document, direct the conversation
-        		back to the context of the document. 
-        		If needed to, ask the user to clarify what they mean. 
-        		Please use plain text only — no markdown tables or special formatting. 
-        		Use short paragraphs, numbered or bulleted lists when needed.
-        		This will be displayed as a text message. 
-        		"""; 
-        
-        conversation.add(Map.of(
-        		  "role", "system",
-        		  "content", prompt
-        		));
-    }
+    
+
 
 	public static String setPDF(byte[] pdf) throws IOException{
-		System.out.print("PDF Received in service");
 		String id = UUID.randomUUID().toString(); //Generate an specific id
+		
 		PDDocument doc = Loader.loadPDF(pdf);
-        int numberOfPages = doc.getNumberOfPages();
-        TreeMap<Integer, String> base64Pages = new TreeMap<>();
+		if (doc != null) {
+			int numberOfPages = doc.getNumberOfPages();
+			TreeMap<Integer, String> base64Pages = new TreeMap<>();
         
-    		
-    	for (int i = 0; i < numberOfPages; ++i) {
-    		int pageNum = i + 1; 
-    		PDPage page = doc.getPage(i);
-
-    		PDDocument singlePageDoc = new PDDocument();
-    		singlePageDoc.addPage(page);
-
-    		ByteArrayOutputStream OS = new ByteArrayOutputStream();
-    		singlePageDoc.save(OS);
-    		singlePageDoc.close();
-
-    		byte[] pageBytes = OS.toByteArray();
-    		String base64 = Base64.getEncoder().encodeToString(pageBytes);
-    		base64Pages.put(pageNum, base64);
-
-    		Page pageNode = new Page(pageNum, page, base64, null, prev);
-
-    		if (prev != null) {
-    		   prev.setNext(pageNode);
-    		} 
-    		else {
-    		   head = pageNode; 
-    		}
-
-    		    prev = pageNode; 
+	        if (numberOfPages == 0) {
+				System.out.print("File not applicable");
+	        }
+	    		
+	    	for (int i = 0; i < numberOfPages; ++i) {
+	    		int pageNum = i + 1; 
+	    		PDPage page = doc.getPage(i);
+	
+	    		PDDocument singlePageDoc = new PDDocument();
+	    		singlePageDoc.addPage(page);
+	
+	    		ByteArrayOutputStream OS = new ByteArrayOutputStream();
+	    		singlePageDoc.save(OS);
+	    		singlePageDoc.close();
+	
+	    		byte[] pageBytes = OS.toByteArray();
+	    		String base64 = Base64.getEncoder().encodeToString(pageBytes);
+	    		base64Pages.put(pageNum, base64);
+	
+	    		Page pageNode = new Page(pageNum, page, base64, null, prev);
+	
+	    		if (prev != null) {
+	    		   prev.setNext(pageNode);
+	    		} 
+	    		else {
+	    		   head = pageNode; 
+	    		}
+	
+	    		    prev = pageNode; 
 
     	}
+	   
     	
         PageLinkedList pageList = new PageLinkedList(head, prev);
 
     	pdfDocTracker.put(id, pageList);///Use id as key
     	encodedPages.put(id, base64Pages);
     	pdfMeta.put(id,numberOfPages);
+		}
 		
 
 		return id; 
@@ -175,138 +157,7 @@ public class PDFService {
 	}
 	
 	
-	public void addPrompt(String id) {
-		 try {
-			 TreeMap<Integer, String> pages = encodedPages.get(id);
-		        if (pages == null || pages.isEmpty()) {
-		        }
 
-		        StringBuilder fullText = new StringBuilder();
-		        for (String base64 : pages.values()) {
-		            byte[] pdfBytes = Base64.getDecoder().decode(base64);
-		            PDDocument doc = Loader.loadPDF(pdfBytes);
-		            PDFTextStripper stripper = new PDFTextStripper();
-		            fullText.append(stripper.getText(doc)).append("\n");
-		            doc.close();
-		        }
-		        doc = fullText.toString(); 
-		        String prompt = """
-		        		Here are the documents provided by the user:  
-		        		""" + fullText.toString();
-		        
-		        
-		        conversation.add(Map.of(
-		        		  "role", "system",
-		        		  "content", prompt
-		        		));
-		 }
-		 catch (Exception e) {
-			 e.printStackTrace(); 
-		 }
-	        
-	}
-	public String askQuestions(String id, String input) {
-		System.out.println(input);
-    try {
-       
-  
-    	   String prompt = """
-	        		Here is the question/statement provided by user
-	        		""" + input + "\n" +
-	        		"""
-	        		Here is the conversation history: 
-	        				""" + conversation;
-	        
-	        
-	        conversation.add(Map.of(
-	        		  "role", "user",
-	        		  "content", input
-	        		));
-
-
-        // Call the model
-        String chatResponse = chatModel.call(prompt);
-        conversation.add(Map.of(
-      		  "role", "ai",
-      		  "content", chatResponse
-      		));
-
-
-        // Print for debugging
-        System.out.println("AI Response: " + chatResponse);
-        return chatResponse;
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        return "Error summarizing PDF: " + e.getMessage();
-    }
-}
-	
-	
-	public List<Question> genQuestions(String id) {
-		ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
-		
-		String randomSeed = UUID.randomUUID().toString();
-
-		System.out.println("printing questions");
-		String prompt = """
-				You are an AI tutor.
-				Please ensure that they differ from the previous set of question: """ + response + """
-				Based on the following document text, generate **10 random multiple-choice questions** to test understanding.
-				There can only be one right answer. 
-				Each time this prompt is called, generate a *different random selection of questions*, varying their wording and difficulty.
-				Format your response strictly as valid JSON:
-				[
-				   {
-				            "question": "Question text here",
-				            "options": ["Option A", "Option B", "Option C", "Option D"],
-				            "answer": "Correct answer text here"
-					}
-				]
-				
-				Do NOT include explanations or any text outside of JSON.
-				All questions must be related to the context of the document. Questions should range in easy to hard difficulty.
-				
-				Document text: 
-				""" + doc;
-		
-		
-		
-		String res = chatModel.call(prompt);
-	
-		if (res.trim().startsWith("<")) {
-			System.err.println("Received HTML instead of JSON");
-			throw new RuntimeException("OpenRouter returned HTML instead of JSON");
-		}
-		
-		String res_cleaned = res    
-				.replaceAll("```json", "")
-			    .replaceAll("```", "")
-			    .trim();
-		
-		
-		Pattern JSONPattern = Pattern.compile("(\\[.*\\]|\\{.*\\})", Pattern.DOTALL);
-		Matcher matcher = JSONPattern.matcher(res_cleaned);
-		if (matcher.find()) {
-			res_cleaned = matcher.group(0);
-		}
-
-		response = res_cleaned; 
-		
-				
-
-		try {
-
-	        mapper.readTree(res_cleaned);
-	        questions = mapper.readValue(res_cleaned, new TypeReference<List<Question>>() {});
-
-		}
-		catch (JacksonException e) {
-			e.printStackTrace();
-		}
-		
-		return questions;
-	}
 	
 	
 
