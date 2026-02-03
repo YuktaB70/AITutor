@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.DocAITutor.DocAITutor.Page;
 import com.DocAITutor.DocAITutor.Question;
-import com.DocAITutor.DocAITutor.PDFService.AiService;
 import com.DocAITutor.DocAITutor.PDFService.PDFService;
 //http://localhost:5173/
 //"https://f88c7bfe.aitutorfrontend.pages.dev/"
@@ -27,11 +26,9 @@ import com.DocAITutor.DocAITutor.PDFService.PDFService;
 public class PDFController {
 	
     private final PDFService pdfService;  // instance field
-    private final AiService aiService; 
     // Constructor injection
-    public PDFController(PDFService pdfService, AiService aiService) {
+    public PDFController(PDFService pdfService) {
         this.pdfService = pdfService;
-        this.aiService = aiService; 
     }
 
 	
@@ -61,11 +58,7 @@ public class PDFController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Error", "PDF could not be set"));
 				
 			}
-		
-			
-		
-			aiService.addPrompt(id);
-		
+				
 			Map<String, String> response = new HashMap<>();
 			response.put("fileName", filename);
 			response.put("fileId", id);
@@ -169,17 +162,17 @@ public class PDFController {
 			
 		}
 	}
-	
-	@PostMapping("/{id}/QAs")
-	public ResponseEntity<String> startChat(@PathVariable String id, @RequestBody  String input) {
-		String response = AiService.askQuestions(id, input);
-	
-		
-	
+//	
+//	@PostMapping("/{id}/QAs")
+//	public ResponseEntity<String> startChat(@PathVariable String id, @RequestBody  String input) {
+//		String response = AiService.askQuestions(id, input);
+//	
+//		
+//	
    
-	return ResponseEntity.ok(response);
-
-	}
+//	return ResponseEntity.ok(response);
+//
+//	}
 	
 //	@GetMapping("/{id}/GenQA")
 //	public ResponseEntity<List<Question>> genQA(@PathVariable String id) {

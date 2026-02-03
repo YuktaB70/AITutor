@@ -1,19 +1,28 @@
-# Use an official Eclipse Temurin (OpenJDK 17) base image
-FROM eclipse-temurin:17-jdk-jammy
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 
-# Set working directory inside the container
-WORKDIR /app
+#Set working directory inside container
+WORKDIR /app 
 
-# Copy Maven files and source code
+#copy pom.xml into container
 COPY pom.xml .
+
+#Download all dependencies
+RUN mvn -q -B dependency:go-offline
+
+#Copy source code
 COPY src ./src
 
-# Install Maven and build your Spring Boot app
-RUN apt-get update && apt-get install -y maven
-RUN mvn clean package -DskipTests
+#build springboot jar. We will also skip test for now
+RUN mvn -q -B package -DskipTests
 
-# Expose the app port
+#lightweight java runtime for production
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8090
 
-# Run your Spring Boot JAR file
-CMD ["java", "-jar", "target/DocAITutor-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
