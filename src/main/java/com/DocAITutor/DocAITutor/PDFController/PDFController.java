@@ -20,7 +20,7 @@ import com.DocAITutor.DocAITutor.Question;
 import com.DocAITutor.DocAITutor.PDFService.PDFService;
 //http://localhost:5173/
 //"https://f88c7bfe.aitutorfrontend.pages.dev/"
-@CrossOrigin(origins = {"http://localhost:5173/"})
+@CrossOrigin(origins = {"https://aitutorfrontend.pages.dev/"})
 @RestController
 @RequestMapping("/pdf")
 public class PDFController {
