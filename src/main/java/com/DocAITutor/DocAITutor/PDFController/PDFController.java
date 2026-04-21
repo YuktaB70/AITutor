@@ -20,7 +20,7 @@ import com.DocAITutor.DocAITutor.Question;
 import com.DocAITutor.DocAITutor.PDFService.PDFService;
 //http://localhost:5173/
 //"https://f88c7bfe.aitutorfrontend.pages.dev/"
-@CrossOrigin(origins = {"https://aitutorfrontend.pages.dev/"})
+@CrossOrigin(origins = {"http://localhost:5173"})
 @RestController
 @RequestMapping("/pdf")
 public class PDFController {
@@ -162,7 +162,23 @@ public class PDFController {
 			
 		}
 	}
-//	
+	
+	//for testing purposes
+	@GetMapping("/exists/{id}")
+	public ResponseEntity<Boolean> checkPdf(@PathVariable String id) throws IOException {
+		boolean response = PDFService.containsPdf(id); 
+		
+		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/extractText/{id}")
+	public ResponseEntity<String> getRawText(@PathVariable String id) throws IOException {
+		String response = PDFService.extractRawText(id); 
+		
+		return ResponseEntity.ok(response);
+	}	
+
+ //	
 //	@PostMapping("/{id}/QAs")
 //	public ResponseEntity<String> startChat(@PathVariable String id, @RequestBody  String input) {
 //		String response = AiService.askQuestions(id, input);

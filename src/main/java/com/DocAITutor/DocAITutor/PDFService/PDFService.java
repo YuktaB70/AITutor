@@ -71,7 +71,7 @@ public class PDFService {
 	public static String setPDF(byte[] pdf) throws IOException{
 		String id = UUID.randomUUID().toString(); //Generate an specific id
 		
-		PDDocument doc = Loader.loadPDF(pdf);
+		PDDocument doc = Loader.loadPDF(pdf); //load as PDDocument obj
 		if (doc != null) {
 			int numberOfPages = doc.getNumberOfPages();
 			TreeMap<Integer, String> base64Pages = new TreeMap<>();
@@ -112,6 +112,7 @@ public class PDFService {
         PageLinkedList pageList = new PageLinkedList(head, prev);
 
     	pdfDocTracker.put(id, pageList);///Use id as key
+    	pdfTracker.put(id, doc);
     	encodedPages.put(id, base64Pages);
     	pdfMeta.put(id,numberOfPages);
 		}
@@ -148,11 +149,34 @@ public class PDFService {
 	}
 	
 	
+	public static String extractRawText(String id) {
+		PDDocument doc = pdfTracker.get(id);
+		if (doc != null) {
+			System.out.print("hello");
+
+			PDFTextStripper stripper = new PDFTextStripper();
+			try {
+				String rawText = stripper.getText(doc);
+				return rawText; 
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+
+		return "No text could be extracted";
+		
+		
+	}
+
 
 	
+	//For testing purposes
+	public static Boolean containsPdf(String id) {
+		boolean exist = pdfDocTracker.containsKey(id);
+		return exist;
+	}
 	
-
-
 	
 	
 

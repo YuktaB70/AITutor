@@ -30,7 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import com.DocAITutor.DocAITutor.PDFService.PDFService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,6 +52,7 @@ class DocAiTutorApplicationTests {
 	//Testing file upload api
 	@Test
 	public void Test01() throws Exception {
+		System.out.print("-----Test 1------\n");
         ClassPathResource resource = new ClassPathResource("Test.pdf");
         byte[] pdfBytes = resource.getInputStream().readAllBytes();
 
@@ -73,6 +74,7 @@ class DocAiTutorApplicationTests {
 	//Testing file upload api, assert id exists
 	@Test
 	public void Test02() throws Exception {
+		System.out.print("-----Test 2------\n");
         ClassPathResource resource = new ClassPathResource("Test.pdf");
         byte[] pdfBytes = resource.getInputStream().readAllBytes();
         ObjectMapper mapper = new ObjectMapper();
@@ -100,6 +102,7 @@ class DocAiTutorApplicationTests {
 	//Testing retrieving file from api endpoint and checking if pdf is returned 
 	@Test
 	public void Test03() throws Exception {
+		System.out.print("-----Test 3------\n");
         ClassPathResource resource = new ClassPathResource("Test.pdf");
         byte[] pdfBytes = resource.getInputStream().readAllBytes();
         ObjectMapper mapper = new ObjectMapper();
@@ -139,6 +142,7 @@ class DocAiTutorApplicationTests {
 	//Testing false id 
 	@Test
 	public void Test04() throws Exception {
+		System.out.print("-----Test 4------\n");
         ClassPathResource resource = new ClassPathResource("Test.pdf");
         byte[] pdfBytes = resource.getInputStream().readAllBytes();
         ObjectMapper mapper = new ObjectMapper();
@@ -164,9 +168,10 @@ class DocAiTutorApplicationTests {
 	    .andExpect(status().isNotFound());
 	}
 	
-	
+	//Testing for page number
 	@Test
 	public void Test05() throws Exception {
+		System.out.print("-----Test 5------\n");
         ClassPathResource resource = new ClassPathResource("Test.pdf");
         byte[] pdfBytes = resource.getInputStream().readAllBytes();
         ObjectMapper mapper = new ObjectMapper();
@@ -184,7 +189,7 @@ class DocAiTutorApplicationTests {
 	    .andReturn();
 	    String responseJson = uploadResults.getResponse().getContentAsString();
 	    String fileId = mapper.readTree(responseJson).get("fileId").asText();
-	    
+	    System.out.print("Id: " + fileId + "\n");
 	    mockMvc.perform(get("/pdf/{id}/metadata", fileId))
 	    .andExpect(status().isOk())
 	    .andExpect(jsonPath("$.PageNumber").value(1));
@@ -194,6 +199,7 @@ class DocAiTutorApplicationTests {
 	//Testing corrupted file
 	@Test
 	public void Test06() throws Exception {
+		System.out.print("-----Test 6------\n");
         ClassPathResource resource = new ClassPathResource("Test02.pdf");
         byte[] pdfBytes = resource.getInputStream().readAllBytes();
         ObjectMapper mapper = new ObjectMapper();
@@ -212,6 +218,34 @@ class DocAiTutorApplicationTests {
 	    .andExpect(jsonPath("$.Error").value("PDF could not be set"));
 	   
 
+	}
+	//Testing for raw text
+	@Test
+	public void Test07() throws Exception {
+		System.out.print("-----Test 7------\n");
+        ClassPathResource resource = new ClassPathResource("Test.pdf");
+        byte[] pdfBytes = resource.getInputStream().readAllBytes();
+        ObjectMapper mapper = new ObjectMapper();
+        
+
+	    MockMultipartFile mockfile = new MockMultipartFile(
+	        "file",
+	        "test.pdf",
+	        "application/pdf",
+	        pdfBytes
+	    );
+
+	    MvcResult uploadResults = mockMvc.perform(multipart("/pdf/uploadpdf").file(mockfile))
+	    .andExpect(status().isOk())
+	    .andReturn();
+	    String responseJson = uploadResults.getResponse().getContentAsString();
+	    String fileId = mapper.readTree(responseJson).get("fileId").asText();
+	    System.out.print("Id: " + fileId + "\n");
+	    MvcResult text = mockMvc.perform(get("/pdf/extractText/{id}", fileId))
+	    		.andExpect(status().isOk())
+	    		.andReturn();
+	    String responseBody = text.getResponse().getContentAsString();
+	    System.out.print(responseBody);
 	}
 	
 	
